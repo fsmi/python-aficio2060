@@ -1,0 +1,1023 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="RichoAficio2060"
+	targetNamespace="http://fsmi.uni-karlsruhe.de/aficio2060.wsdl"
+	xmlns:af="http://fsmi.uni-karlsruhe.de/aficio2060.wsdl"
+	xmlns:ud="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory"
+	xmlns:dm="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement"
+	xmlns:rc="http://www.ricoh.co.jp/xmlns/soap/rdh/common"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+	<wsdl:types>
+		<xs:schema targetNamespace="http://www.ricoh.co.jp/xmlns/soap/rdh/common">
+			<xs:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+			<xs:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+			<xs:element name="option" type="xs:NCName"/>
+			<xs:element name="validDurationHint" type="xs:integer"/>
+			<xs:element name="object">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:name"/>
+						<xs:element ref="rc:class"/>
+						<xs:element ref="rc:oid"/>
+						<xs:element ref="rc:fieldList"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="postProcess">
+				<xs:complexType>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="truncatedParameter">
+				<xs:complexType>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="failedPropertyIndex" type="xs:integer"/>
+			<xs:element name="failedCode">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="currentDateTime" type="xs:NMTOKEN"/>
+			<xs:element name="otherStates">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="selectProps">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+					
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="propList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+					
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="parentObjectId">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="propListList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+					
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="lockMode" type="xs:NCName"/>
+			<xs:element name="stringIn" type="xs:string"/>
+			<xs:element name="timeLimit" type="xs:integer"/>
+			<xs:complexType name="sessionId">
+				<xs:sequence>
+					<xs:element ref="rc:sessionId"/>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:element name="sessionId" type="xs:integer"/>
+			<xs:element name="objectClass" type="xs:NCName"/>
+			<xs:element name="item">
+				<xs:complexType>
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:element ref="rc:description"/>
+						<xs:element ref="rc:name"/>
+						<xs:element ref="rc:hidden"/>
+						<xs:element ref="rc:max"/>
+						<xs:element ref="rc:min"/>
+						<xs:element ref="rc:multiple"/>
+						<xs:element ref="rc:propName"/>
+						<xs:element ref="rc:propVal"/>
+						<xs:element ref="rc:rangeType"/>
+						<xs:element ref="rc:readable"/>
+						<xs:element ref="rc:required"/>
+						<xs:element ref="rc:type"/>
+						<xs:element ref="rc:unique"/>
+						<xs:element ref="rc:value"/>
+						<xs:element ref="rc:valueEnum"/>
+						<xs:element ref="rc:valueStep"/>
+						<xs:element ref="rc:writeable"/>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="hidden" type="xs:boolean"/>
+			<xs:element name="max">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="min">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="multiple" type="xs:boolean"/>
+			<xs:element name="propName" type="xs:string"/>
+			<xs:element name="propVal" type="xs:string"/>
+			<xs:element name="rangeType" type="xs:NCName"/>
+			<xs:element name="readable" type="xs:boolean"/>
+			<xs:element name="required" type="xs:boolean"/>
+			<xs:element name="type" type="xs:NCName"/>
+			<xs:element name="unique" type="xs:boolean"/>
+			<xs:element name="value" type="xs:NMTOKEN"/>
+			<xs:element name="valueEnum">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="soap-enc:Array">
+							<xs:attribute ref="soap-enc:arrayType" wsdl:arrayType="xs:string[]" />
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="valueStep">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="writeable" type="xs:boolean"/>
+			<xs:element name="options">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+					
+				</xs:complexType>
+			</xs:element>
+			<xs:complexType name="returnValue">
+				<xs:sequence>
+					<xs:element ref="rc:returnValue"/>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:element name="returnValue">
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:element ref="rc:class"/>
+						<xs:element ref="rc:description"/>
+						<xs:element ref="rc:fieldList"/>
+						<xs:element ref="rc:item"/>
+						<xs:element ref="rc:name"/>
+						<xs:element ref="rc:oid"/>
+						<xs:element ref="rc:operationList"/>
+					</xs:choice>
+					<xs:attribute ref="soap-enc:arrayType"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="operationList">
+				<xs:complexType>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="stringOut" type="xs:integer"/>
+			<xs:element name="deviceId" type="xs:integer"/>
+			<xs:element name="objectId" type="xs:NMTOKEN"/>
+			<xs:element name="fieldList">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:restriction base="soap-enc:Array">
+							<xs:attribute ref="soap-enc:arrayType" wsdl:arrayType="rc:item[]" />
+						</xs:restriction>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="name" type="xs:NMTOKEN"/>
+			<xs:element name="class" type="xs:NCName"/>
+			<xs:element name="oid" type="xs:integer"/>
+			<xs:element name="description" type="xs:string"/>
+			<xs:element name="fromClass" type="xs:NCName"/>
+			<xs:element name="isDescending" type="xs:boolean"/>
+			<xs:element name="lastObjectId">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="numOfResults" type="xs:integer"/>
+			<xs:element name="objectIdList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="operator">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="orderBy">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="propVal2">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="queryOptions">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="resultSetId">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="rowOffset" type="xs:integer"/>
+			<xs:element name="rowCount" type="xs:integer"/>
+			<xs:element name="rowList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="supportedClasses">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="whereAnd">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="whereOr">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:item"/>
+					</xs:sequence>
+					<xs:attribute ref="soap-enc:arrayType" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
+		<xs:schema targetNamespace="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement">
+			<xs:import namespace="http://www.ricoh.co.jp/xmlns/soap/rdh/common" />
+			<xs:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+			<xs:element name="getObject">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer" />
+						<xs:element name="deviceId" type="xs:integer"/>
+						<xs:element name="objectId" type="xs:integer"/>
+						<xs:element name="fieldList">
+							<xs:complexType>
+								<xs:complexContent>
+									<xs:restriction base="soap-enc:Array">
+										<xs:attribute ref="soap-enc:arrayType" wsdl:arrayType="xs:string[]" />
+									</xs:restriction>
+								</xs:complexContent>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getObjectCapability">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:deviceId"/>
+								<xs:element ref="rc:objectId"/>
+								<xs:element ref="rc:option"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getObjectCapabilityResponse" type="rc:returnValue"/>
+			<xs:element name="getObjectResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="name" type="xs:integer" />
+									<xs:element name="class" type="xs:string" />
+									<xs:element name="oid" type="xs:integer" />
+									<xs:element name="fieldList">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="name" type="xs:string" />
+															<xs:element name="value" type="xs:string" />
+															<xs:element name="type" type="xs:string" />
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getObjects">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+						<xs:element name="deviceId" type="xs:integer"></xs:element>
+						<xs:element name="objectClass" type="xs:string"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getObjectsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded" type="xs:integer"></xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getProtocolVersion">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="getProtocolVersionResponse" type="rc:returnValue"/>
+			<xs:element name="lockDevice">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:deviceId"/>
+								<xs:element ref="rc:validDurationHint"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="lockDeviceResponse" type="rc:returnValue"/>
+			<xs:element name="startSession">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="stringIn" type="xs:string"/>
+						<xs:element name="timeLimit" type="xs:integer"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="startSessionResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:string"></xs:element>
+						<xs:element name="stringOut" type="xs:integer"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="terminateSession">
+				<xs:complexType>
+					<xs:all>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+					</xs:all>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="terminateSessionResponse">
+				<xs:complexType>
+					<xs:all>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+					</xs:all>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="unlockDevice">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:deviceId"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="unlockDeviceResponse" type="rc:returnValue"/>
+			<xs:element name="updateObject">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:deviceId"/>
+								<xs:element ref="rc:object"/>
+								<xs:element ref="rc:options"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="updateObjectResponse">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:returnValue">
+							<xs:sequence>
+								<xs:element ref="rc:objectId"/>
+								<xs:element ref="rc:postProcess"/>
+								<xs:element ref="rc:truncatedParameter"/>
+								<xs:element ref="rc:failedPropertyIndex"/>
+								<xs:element ref="rc:failedCode"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
+		<xs:schema targetNamespace="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+			<xs:import namespace="http://www.ricoh.co.jp/xmlns/soap/rdh/common" />
+			<xs:element name="getProtocolVersion">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="getProtocolVersionResponse" type="rc:returnValue"/>
+			<xs:element name="getServiceCapability" type="rc:sessionId"/>
+			<xs:element name="getServiceState" type="rc:sessionId"/>
+			<xs:element name="getServiceStateResponse">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:returnValue">
+							<xs:sequence>
+								<xs:element ref="rc:currentDateTime"/>
+								<xs:element ref="rc:otherStates"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getServiceVersion">
+				<xs:complexType/>
+			</xs:element>
+			<xs:element name="getServiceVersionResponse" type="rc:returnValue"/>
+			<xs:element name="getSessionProps">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:selectProps"/>
+								<xs:element ref="rc:options"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getSessionPropsResponse" type="rc:returnValue"/>
+			<xs:element name="putObjectProps">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:objectId"/>
+								<xs:element ref="rc:propList"/>
+								<xs:element ref="rc:options"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="putObjectPropsResponse" type="rc:returnValue"/>
+			<xs:element name="putObjects">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:objectClass"/>
+								<xs:element ref="rc:parentObjectId"/>
+								<xs:element ref="rc:propListList"/>
+								<xs:element ref="rc:options"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="putObjectsResponse" type="rc:returnValue"/>
+			<xs:element name="startSession">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="rc:stringIn"/>
+						<xs:element ref="rc:timeLimit"/>
+						<xs:element ref="rc:lockMode"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="startSessionResponse">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:returnValue">
+							<xs:sequence>
+								<xs:element ref="rc:stringOut"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="terminateSession" type="rc:sessionId"/>
+			<xs:element name="terminateSessionResponse" type="rc:returnValue"/>
+			<xs:element name="getObjectsProps">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:objectIdList"/>
+								<xs:element ref="rc:selectProps"/>
+								<xs:element ref="rc:options"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getObjectsPropsResponse" type="rc:returnValue"/>
+			<xs:element name="getServiceCapabilityResponse">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:returnValue">
+							<xs:sequence>
+								<xs:element ref="rc:supportedClasses"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="keepSession" type="rc:sessionId"/>
+			<xs:element name="keepSessionResponse" type="rc:returnValue"/>
+			<xs:element name="searchObjects">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:sessionId">
+							<xs:sequence>
+								<xs:element ref="rc:selectProps"/>
+								<xs:element ref="rc:fromClass"/>
+								<xs:element ref="rc:parentObjectId"/>
+								<xs:element ref="rc:resultSetId"/>
+								<xs:element ref="rc:whereAnd"/>
+								<xs:element ref="rc:whereOr"/>
+								<xs:element ref="rc:orderBy"/>
+								<xs:element ref="rc:rowOffset"/>
+								<xs:element ref="rc:rowCount"/>
+								<xs:element ref="rc:lastObjectId"/>
+								<xs:element ref="rc:queryOptions"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="searchObjectsResponse">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="rc:returnValue">
+							<xs:sequence>
+								<xs:element ref="rc:resultSetId"/>
+								<xs:element ref="rc:numOfResults"/>
+								<xs:element ref="rc:rowList"/>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
+	</wsdl:types>
+	
+	<wsdl:message name="UserDirectoryStartSessionRequest">
+		<wsdl:part name="body" element="ud:startSession"/>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryStartSessionResponse">
+		<wsdl:part name="body" element="ud:startSessionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryGetSessionPropsRequest">
+		<wsdl:part name="body" element="ud:getSessionProps" />
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryGetSessionPropsResponse">
+		<wsdl:part name="body" element="ud:getSessionPropsResponse" />
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryTerminateSessionRequest">
+		<wsdl:part name="body" element="ud:terminateSession"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryTerminateSessionResponse">
+		<wsdl:part name="body" element="ud:terminateSessionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryGetProtocolVersionRequest">
+		<wsdl:part name="body" element="ud:getProtocolVersion"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryGetProtocolVersionResponse">
+		<wsdl:part name="body" element="ud:getProtocolVersionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorygetServiceVersionRequest">
+		<wsdl:part name="body" element="ud:getServiceVersion"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorygetServiceVersionResponse">
+		<wsdl:part name="body" element="ud:getServiceVersionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorygetServiceStateRequest">
+		<wsdl:part name="body" element="ud:getServiceState"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorygetServiceStateResponse">
+		<wsdl:part name="body" element="ud:getServiceStateResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryPutObjectPropsRequest">
+		<wsdl:part name="body" element="ud:putObjectProps"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryPutObjectPropsResponse">
+		<wsdl:part name="body" element="ud:putObjectPropsResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryPutObjectsRequest">
+		<wsdl:part name="body" element="ud:putObjects"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryPutObjectsResponse">
+		<wsdl:part name="body" element="ud:putObjectsResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryGetObjectsPropsRequest">
+		<wsdl:part name="body" element="ud:getObjectsProps"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryGetObjectsPropsResponse">
+		<wsdl:part name="body" element="ud:getObjectsPropsResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorygetServiceCapabilityRequest">
+		<wsdl:part name="body" element="ud:getServiceCapability"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorygetServiceCapabilityResponse">
+		<wsdl:part name="body" element="ud:getServiceCapabilityResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryKeepSessionRequest">
+		<wsdl:part name="body" element="ud:keepSession"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectoryKeepSessionResponse">
+		<wsdl:part name="body" element="ud:keepSessionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorySearchObjectsRequest">
+		<wsdl:part name="body" element="ud:searchObjects"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="UserDirectorySearchObjectsResponse">
+		<wsdl:part name="body" element="ud:searchObjectsResponse"></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="DeviceManagementStartSessionRequest">
+		<wsdl:part name="body" element="dm:startSession"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementStartSessionResponse">
+		<wsdl:part name="body" element="dm:startSessionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementTerminateSessionRequest">
+		<wsdl:part name="body" element="dm:terminateSession"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementTerminateSessionResponse">
+		<wsdl:part name="body" element="dm:terminateSessionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetProtocolVersionRequest">
+		<wsdl:part name="body" element="dm:getProtocolVersion"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetProtocolVersionResponse">
+		<wsdl:part name="body" element="dm:getProtocolVersionResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementLockDeviceRequest">
+		<wsdl:part name="body" element="dm:lockDevice"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementLockDeviceResponse">
+		<wsdl:part name="body" element="dm:lockDeviceResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementUnlockDeviceRequest">
+		<wsdl:part name="body" element="dm:unlockDevice"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementUnlockDeviceResponse">
+		<wsdl:part name="body" element="dm:unlockDeviceResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetObjectRequest">
+		<wsdl:part name="body" element="dm:getObject"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetObjectResponse">
+		<wsdl:part name="body" element="dm:getObjectResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetObjectCapabilityRequest">
+		<wsdl:part name="body" element="dm:getObjectCapability"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetObjectCapabilityResponse">
+		<wsdl:part name="body" element="dm:getObjectCapabilityResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetObjectsRequest">
+		<wsdl:part name="body" element="dm:getObjects"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementGetObjectsResponse">
+		<wsdl:part name="body" element="dm:getObjectsResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementUpdateObjectRequest">
+		<wsdl:part name="body" element="dm:updateObject"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DeviceManagementUpdateObjectResponse">
+		<wsdl:part name="body" element="dm:updateObjectResponse"></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:portType name="UserDirectoryPortType">
+		<wsdl:operation name="StartSession">
+			<wsdl:input message="af:UserDirectoryStartSessionRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryStartSessionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetSessionProps">
+			<wsdl:input message="af:UserDirectoryGetSessionPropsRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryGetSessionPropsResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="TerminateSession">
+			<wsdl:input message="af:UserDirectoryTerminateSessionRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryTerminateSessionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetProtocolVersion">
+			<wsdl:input message="af:UserDirectoryGetProtocolVersionRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryGetProtocolVersionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getServiceVersion">
+			<wsdl:input message="af:UserDirectorygetServiceVersionRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectorygetServiceVersionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getServiceState">
+			<wsdl:input message="af:UserDirectorygetServiceStateRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectorygetServiceStateResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="PutObjectProps">
+			<wsdl:input message="af:UserDirectoryPutObjectPropsRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryPutObjectPropsResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="PutObjects">
+			<wsdl:input message="af:UserDirectoryPutObjectsRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryPutObjectsResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjectsProps">
+			<wsdl:input message="af:UserDirectoryGetObjectsPropsRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryGetObjectsPropsResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getServiceCapability">
+			<wsdl:input message="af:UserDirectorygetServiceCapabilityRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectorygetServiceStateResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="KeepSession">
+			<wsdl:input message="af:UserDirectoryKeepSessionRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectoryKeepSessionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="SearchObjects">
+			<wsdl:input message="af:UserDirectorySearchObjectsRequest"></wsdl:input>
+			<wsdl:output message="af:UserDirectorySearchObjectsResponse"></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	
+	<wsdl:portType name="DeviceManagementPortType">
+		<wsdl:operation name="StartSession">
+			<wsdl:input message="af:DeviceManagementStartSessionRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementStartSessionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="TerminateSession">
+			<wsdl:input message="af:DeviceManagementTerminateSessionRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementTerminateSessionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetProtocolVersion">
+			<wsdl:input message="af:DeviceManagementGetProtocolVersionRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementGetProtocolVersionResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="LockDevice">
+			<wsdl:input message="af:DeviceManagementLockDeviceRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementLockDeviceResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="UnlockDevice">
+			<wsdl:input message="af:DeviceManagementUnlockDeviceRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementUnlockDeviceResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObject">
+			<wsdl:input message="af:DeviceManagementGetObjectRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementGetObjectResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjectCapability">
+			<wsdl:input message="af:DeviceManagementGetObjectCapabilityRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementGetObjectCapabilityResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjects">
+			<wsdl:input message="af:DeviceManagementGetObjectsRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementGetObjectsResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="UpdateObject">
+			<wsdl:input message="af:DeviceManagementUpdateObjectRequest"></wsdl:input>
+			<wsdl:output message="af:DeviceManagementUpdateObjectResponse"></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	
+	<wsdl:binding name="UserDirectorySoapBinding" type="af:UserDirectoryPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+		<wsdl:operation name="StartSession">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#startSession"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetSessionProps">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getSessionProps"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="TerminateSession">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#terminateSession"/>
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetProtocolVersion">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getProtocolVersion"/>
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getServiceVersion">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getServiceVersion"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getServiceState">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getServiceState"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="PutObjectProps">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="PutObjects">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjects"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjectsProps">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getObjectsProps"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getServiceCapability">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getServiceCapability"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="KeepSession">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#keepSession"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="SearchObjects">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#searchObjects"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	
+	<wsdl:binding name="DeviceManagementSoapBinding" type="af:DeviceManagementPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+		<wsdl:operation name="StartSession">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#startSession"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="TerminateSession">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#terminateSession"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetProtocolVersion">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#getProtocolVersion"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="LockDevice">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#lockDevice"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="UnlockDevice">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#unlockDevice"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObject">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#getObject"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjectCapability">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#getObjectCapability"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjects">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#getObjects"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="UpdateObject">
+			<soap:operation soapAction="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement#updateObject"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	
+	<wsdl:service name="UserDirectoryService">
+		<wsdl:documentation>User directory service for Aficio 2060</wsdl:documentation>
+		<wsdl:port name="UserDirectoryPort" binding="af:UserDirectorySoapBinding">
+			<soap:address location="http://fsi-pr2/DH/udirectory" />
+		</wsdl:port>
+	</wsdl:service>
+	
+	<wsdl:service name="DeviceManagementService">
+		<wsdl:documentation>Device management service for Aficio 2060</wsdl:documentation>
+		<wsdl:port name="DeviceManagementPort" binding="af:DeviceManagementSoapBinding">
+			<soap:address location="http://fsi-pr2/DH/devicemanagement"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
