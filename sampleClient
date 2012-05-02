@@ -1,0 +1,38 @@
+#!/bin/python2.7
+
+from suds.client import Client
+
+#import logging
+#logging.basicConfig(level=logging.INFO)
+#logging.getLogger('suds.client').setLevel(logging.DEBUG)
+
+
+url = "file:///home/k3ks/Development/python-aficio2060/aficio2060.wsdl"
+passString = "SCHEME=QkFTSUM=;UID:UserName=YWRtaW4=;PWD:Password=Puk/P3xsIqA8rqhvvupmYyImr3zjaH9j4WvufP9/qf7/Pv9mbHx/JCp+P3zgZr9nf6YkJ+hnvqc/JP6/Zz4+6v48rj98/2l8PyPopuFu/i4+/y8+aKbvr67+7r9/byZr/qj/4akmqD4iKT++5yl/Kn/iLqLq///p/6G+7OuqaOlraf4+;PES:Encoding=gwpwes003"
+
+client = Client(url, cache=None)
+
+users = {}
+
+dm = client.service["DeviceManagementService"]
+ud = client.service["UserDirectoryService"]
+
+dmSession = dm.StartSession(passString, 0)
+udSession = ud.StartSession(passString, 0, "S")
+objects = dm.GetObjects(dmSession.stringOut, 0, "usageCounter.userCounter")
+for o in objects.item:
+	print "oid - " + str(o)
+	obj = dm.GetObject(dmSession.stringOut, 0, o, {"item" : ["copyBlack", "printBlack"]})
+	print "objname - " + str(obj.name)
+	objcap = dm.GetObjectCapability(dmSession.stringOut, 0, obj.oid, "ALL")
+	print "type - " + objcap.cls
+	try:
+		objprops = ud.GetObjectsProps(udSession.stringOut, { "item" : ["entry:"+str(obj.name)] }, { "item" : [ "name", "auth:name" ] }, {})
+		for  item in objprops.item.item:
+			print item.propName + " - " + item.propVal
+	except:
+		print "Error occoured"
+	print ""
+		
+dm.TerminateSession(dmSession.stringOut)
+ud.TerminateSession(udSession.stringOut)

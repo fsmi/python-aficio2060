@@ -175,7 +175,7 @@
 					<xs:attribute ref="soap-enc:arrayType" use="required"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="stringOut" type="xs:integer"/>
+			<xs:element name="stringOut" type="xs:string"/>
 			<xs:element name="deviceId" type="xs:integer"/>
 			<xs:element name="objectId" type="xs:NMTOKEN"/>
 			<xs:element name="fieldList">
@@ -266,8 +266,6 @@
 			</xs:element>
 		</xs:schema>
 		<xs:schema targetNamespace="http://www.ricoh.co.jp/xmlns/soap/rdh/devicemanagement">
-			<xs:import namespace="http://www.ricoh.co.jp/xmlns/soap/rdh/common" />
-			<xs:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
 			<xs:element name="getObject">
 				<xs:complexType>
 					<xs:sequence>
@@ -276,11 +274,9 @@
 						<xs:element name="objectId" type="xs:integer"/>
 						<xs:element name="fieldList">
 							<xs:complexType>
-								<xs:complexContent>
-									<xs:restriction base="soap-enc:Array">
-										<xs:attribute ref="soap-enc:arrayType" wsdl:arrayType="xs:string[]" />
-									</xs:restriction>
-								</xs:complexContent>
+								<xs:sequence>
+									<xs:element name="item" type="xs:string" minOccurs="0" maxOccurs="unbounded"></xs:element>
+								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
@@ -288,18 +284,65 @@
 			</xs:element>
 			<xs:element name="getObjectCapability">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:sessionId">
-							<xs:sequence>
-								<xs:element ref="rc:deviceId"/>
-								<xs:element ref="rc:objectId"/>
-								<xs:element ref="rc:option"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer" />
+						<xs:element name="deviceId" type="xs:integer"/>
+						<xs:element name="objectId" type="xs:integer"/>
+						<xs:element name="option" type="xs:string"/>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="getObjectCapabilityResponse" type="rc:returnValue"/>
+			<xs:element name="getObjectCapabilityResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="name" type="xs:string"></xs:element>
+									<xs:element name="class" type="xs:string"></xs:element>
+									<xs:element name="description" type="xs:string"></xs:element>
+									<xs:element name="fieldList">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="name" type="xs:string"></xs:element>
+															<xs:element name="value" type="xs:string"></xs:element>
+															<xs:element name="type" type="xs:string"></xs:element>
+															<xs:element name="description" type="xs:string"></xs:element>
+															<xs:element name="rangeType" type="xs:string"></xs:element>
+															<xs:element name="min" type="xs:string"></xs:element>
+															<xs:element name="max" type="xs:string"></xs:element>
+															<xs:element name="valueStep" type="xs:string"></xs:element>
+															<xs:element name="valueEnum">
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element name="item" type="xs:string"></xs:element>
+																	</xs:sequence>
+																</xs:complexType>
+															</xs:element>
+															<xs:element name="unique" type="xs:boolean"></xs:element>
+															<xs:element name="multiple" type="xs:boolean"></xs:element>
+															<xs:element name="required" type="xs:boolean"></xs:element>
+															<xs:element name="readable" type="xs:boolean"></xs:element>
+															<xs:element name="writeable" type="xs:boolean"></xs:element>
+															<xs:element name="hidden" type="xs:boolean"></xs:element>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element name="operationList">
+										<xs:complexType />
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="getObjectResponse">
 				<xs:complexType>
 					<xs:sequence>
@@ -355,20 +398,29 @@
 			<xs:element name="getProtocolVersion">
 				<xs:complexType/>
 			</xs:element>
-			<xs:element name="getProtocolVersionResponse" type="rc:returnValue"/>
-			<xs:element name="lockDevice">
+			<xs:element name="getProtocolVersionResponse">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:sessionId">
-							<xs:sequence>
-								<xs:element ref="rc:deviceId"/>
-								<xs:element ref="rc:validDurationHint"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:integer"></xs:element>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="lockDeviceResponse" type="rc:returnValue"/>
+			<xs:element name="lockDevice">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+						<xs:element name="deviceId" type="xs:integer"/>
+						<xs:element name="validDurationHint" type="xs:integer"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="lockDeviceResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:string"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="startSession">
 				<xs:complexType>
 					<xs:sequence>
@@ -381,7 +433,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="returnValue" type="xs:string"></xs:element>
-						<xs:element name="stringOut" type="xs:integer"/>
+						<xs:element name="stringOut" type="xs:string"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -395,48 +447,85 @@
 			<xs:element name="terminateSessionResponse">
 				<xs:complexType>
 					<xs:all>
-						<xs:element name="sessionId" type="xs:integer"></xs:element>
+						<xs:element name="returnValue" type="xs:string"></xs:element>
 					</xs:all>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="unlockDevice">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:sessionId">
-							<xs:sequence>
-								<xs:element ref="rc:deviceId"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+						<xs:element name="deviceId" type="xs:integer"/>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="unlockDeviceResponse" type="rc:returnValue"/>
+			<xs:element name="unlockDeviceResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:string"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="updateObject">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:sessionId">
-							<xs:sequence>
-								<xs:element ref="rc:deviceId"/>
-								<xs:element ref="rc:object"/>
-								<xs:element ref="rc:options"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+						<xs:element name="deviceId" type="xs:integer"/>
+						<xs:element name="object">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="name" type="xs:integer" />
+									<xs:element name="class" type="xs:string" />
+									<xs:element name="oid" type="xs:integer" />
+									<xs:element name="fieldList">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="name" type="xs:string" />
+															<xs:element name="value" type="xs:string" />
+															<xs:element name="type" type="xs:string" />
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="options">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="propName" type="xs:string"></xs:element>
+												<xs:element name="propVal" type="xs:string"></xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="updateObjectResponse">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:returnValue">
-							<xs:sequence>
-								<xs:element ref="rc:objectId"/>
-								<xs:element ref="rc:postProcess"/>
-								<xs:element ref="rc:truncatedParameter"/>
-								<xs:element ref="rc:failedPropertyIndex"/>
-								<xs:element ref="rc:failedCode"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:string"></xs:element>
+						<xs:element name="objectId" type="xs:integer"/>
+						<xs:element name="postProcess">
+							<xs:complexType />
+						</xs:element>
+						<xs:element name="truncatedParameter">
+							<xs:complexType />
+						</xs:element>
+						<xs:element name="failedPropertyIndex" type="xs:integer"/>
+						<xs:element name="failedCode" type="xs:integer"/>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 		</xs:schema>
@@ -445,25 +534,66 @@
 			<xs:element name="getProtocolVersion">
 				<xs:complexType/>
 			</xs:element>
-			<xs:element name="getProtocolVersionResponse" type="rc:returnValue"/>
+			<xs:element name="getProtocolVersionResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:integer"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element> 
 			<xs:element name="getServiceCapability" type="rc:sessionId"/>
-			<xs:element name="getServiceState" type="rc:sessionId"/>
+			<xs:element name="getServiceState">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="getServiceStateResponse">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:returnValue">
-							<xs:sequence>
-								<xs:element ref="rc:currentDateTime"/>
-								<xs:element ref="rc:otherStates"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="returnValue" type="xs:string"></xs:element>
+						<xs:element name="currentDateTime" type="xs:dateTime"/>
+						<xs:element name="otherStates">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="propName" type="xs:string"></xs:element>
+												<xs:element name="propVal" type="xs:string"></xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="getServiceVersion">
 				<xs:complexType/>
 			</xs:element>
-			<xs:element name="getServiceVersionResponse" type="rc:returnValue"/>
+			<xs:element name="getServiceVersionResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="propName" type="xs:string"></xs:element>
+												<xs:element name="propVal" type="xs:string"></xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="getSessionProps">
 				<xs:complexType>
 					<xs:complexContent>
@@ -530,18 +660,65 @@
 			<xs:element name="terminateSessionResponse" type="rc:returnValue"/>
 			<xs:element name="getObjectsProps">
 				<xs:complexType>
-					<xs:complexContent>
-						<xs:extension base="rc:sessionId">
-							<xs:sequence>
-								<xs:element ref="rc:objectIdList"/>
-								<xs:element ref="rc:selectProps"/>
-								<xs:element ref="rc:options"/>
-							</xs:sequence>
-						</xs:extension>
-					</xs:complexContent>
+					<xs:sequence>
+						<xs:element name="sessionId" type="xs:integer"></xs:element>
+						<xs:element name="objectIdList">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded" type="xs:string"></xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="selectProps">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded" type="xs:string"></xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="options">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="propName" type="xs:string"></xs:element>
+												<xs:element name="propVal" type="xs:string"></xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="getObjectsPropsResponse" type="rc:returnValue"/>
+			<xs:element name="getObjectsPropsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="returnValue">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="item">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="propName" type="xs:string"></xs:element>
+															<xs:element name="propVal" type="xs:string"></xs:element>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="getServiceCapabilityResponse">
 				<xs:complexType>
 					<xs:complexContent>
