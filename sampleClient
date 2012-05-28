@@ -21,18 +21,18 @@ dmSession = dm.StartSession(passString, 0)
 udSession = ud.StartSession(passString, 0, "S")
 objects = dm.GetObjects(dmSession.stringOut, 0, "usageCounter.userCounter")
 for o in objects.item:
-	print "oid - " + str(o)
-	obj = dm.GetObject(dmSession.stringOut, 0, o, {"item" : ["copyBlack", "printBlack"]})
-	print "objname - " + str(obj.name)
+	obj = dm.GetObject(dmSession.stringOut, 0, o, {"item" : ["copyBlack", "copyBlackA3Over", "printBlack", "printerBlackA3Over", "scannerBlack", "scannerBlackA3Over", "blackTotal", "blackAccount", "scanTotal", "authName"]})
 	objcap = dm.GetObjectCapability(dmSession.stringOut, 0, obj.oid, "ALL")
-	print "type - " + objcap.cls
 	try:
 		objprops = ud.GetObjectsProps(udSession.stringOut, { "item" : ["entry:"+str(obj.name)] }, { "item" : [ "name", "auth:name" ] }, {})
 		for  item in objprops.item.item:
-			print item.propName + " - " + item.propVal
+			if item.propVal == "4042":
+				print str(o)
+				print str(obj.fieldList.item)
+				print str(objprops)
+		
 	except:
-		print "Error occoured"
-	print ""
+		print "Error occoured with object " + str(o)
 		
 dm.TerminateSession(dmSession.stringOut)
 ud.TerminateSession(udSession.stringOut)
