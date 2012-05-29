@@ -27,9 +27,7 @@ restrictions (respectively).
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
 
 
-from suds import suds.Client
-import time
-from aficio2060.encoding import encode, decode, DEFAULT_STRING_ENCODING
+from suds.client import Client
 
 
 class UserMaintError(RuntimeError):
@@ -141,6 +139,26 @@ class UserStatistics(object):
     @staticmethod
     def from_soap_object(obj):
         items = obj.fieldList.item
+        copy_a4 = 0
+        copy_a3 = 0
+        print_a4 = 0
+        print_a3 = 0
+        scan_a4 = 0
+        scan_a3 = 0
+        for item in items:
+            if item.name == "copyBlack":
+                copy_a4 = int(item.value)
+            if item.name == "copyBlackA3Over":
+                copy_a3 = int(item.value)
+            if item.name == "printerBlack":
+                print_a4 = int(item.value)
+            if item.name == "printerBlackA3Over":
+                print_a3 = int(item.value)
+            if item.name == "scannerBlack":
+                scan_a4 = int(item.value)
+            if item.name == "scannerBlackA3Over":
+                scan_a3 = int(item.value)
+        return UserStatistics(copy_a4, copy_a3, print_a4, print_a3, scan_a4, scan_a3)
 
 class UserRestrict(object):
     """This class represents a set of access restrictions.
@@ -165,7 +183,7 @@ class UserRestrict(object):
         self.grant_storage = grant_storage
 
     def __repr__(self):
-        return '<UserRestrict c%dp%ds%dst%d>' % (self.grant_copy,
+        return '<UserRestrict c%d, p%d, s%d, st%d>' % (self.grant_copy,
                 self.grant_printer, self.grant_scanner, self.grant_storage)
 
     def revoke_all(self):
@@ -180,6 +198,23 @@ class UserRestrict(object):
         return self.grant_copy or self.grant_printer or self.grant_scanner or \
                 self.grant_storage
 
+    @staticmethod
+    def from_soap_object(obj):
+        items = obj.fieldList.item
+        grant_copy = False
+        grant_printer = False
+        grant_scanner = False
+        grant_storage = False
+        for item in items:
+            if item.name == "copyBlack" and item.value == "OFF":
+                grant_copy = True
+            if item.name == "printerBlack" and item.value == "OFF":
+                grant_printer = True
+            if item.name == "scannerBlack" and item.value == "OFF":
+                grant_scanner = True
+            if item.name == "localStorage" and item.value == "OFF":
+                grant_storage = True
+        return UserRestrict(grant_copy, grant_printer, grant_scanner, grant_storage)
 
 class User(object):
     """This class represents a single user in the printer's user accounting.  It
@@ -193,7 +228,7 @@ class User(object):
 
     MAX_NAME_LEN = 20
 
-    def __init__(self, user_code, name, internal_name, restrict=None, stats=None):
+    def __init__(self, user_code, name, restrict=None, stats=None, internal_name=None):
         self.user_code = user_code
         self.name = name
         self.internal_name = internal_name
@@ -237,11 +272,28 @@ class User(object):
     def _get_name(self):
         return self.__name
     name = property(_get_name, _set_name)
+    
+    def _set_internal_name(self, internal_name):
+        self._internal_name = internal_name
+    def _get_internal_name(self):
+        return self._internal_name
+    internal_name = property(_get_internal_name, _set_internal_name)
 
     def __repr__(self):
-        return '<User "%s" (#%s, %s, %s)>' % (unicode(self.name),
-                str(self.user_code), str(self.restrict), str(self.stats))
-
+        return '<User "%s" (#%s, %s, %s, %s)>' % (unicode(self.name),
+                str(self.user_code), str(self.internal_name), str(self.restrict), str(self.stats))
+                
+    @staticmethod
+    def from_soap_object(obj):
+        items = obj.item.item
+        name = ""
+        code = ""
+        for item in items:
+            if item.propName == "name":
+                name = str(item.propVal)
+            if item.propName == "auth:name":
+                code = int(item.propVal)
+        return User(code, name)
 
 class UserMaintSession(object):
     """
@@ -253,21 +305,45 @@ class UserMaintSession(object):
     """
     BUSY_CODE = 'systemBusy'
 
-    def __init__(self, passString, wsdl):
-        self.pass_string = passString
-        self.wsdl = wsdl
-        self.soap_client = Client(wsdl, cache=None)
+    def __init__(self, pass_string, wsdl):
+        self.pass_string = pass_string
+        self.wsdl = wsdl if wsdl.startswith("file://") else "file://" + wsdl
+        self.soap_client = Client(self.wsdl, cache=None)
         self.dm_service = self.soap_client.service["DeviceManagementService"]
         self.ud_service = self.soap_client.service["UserDirectoryService"]
-        self.dm_session = self.dm_service.StartSession(passString, 0).stringOut
-        self.ud_session = self.ud_service.StartSession(passString, 0, "S").stringOut
+        self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut
+        self.ud_session = self.ud_service.StartSession(self.pass_string, 0, "S").stringOut
         
-        user_ids = self.dm_service.GetObjects(self.dm_session, 0, "usageCounter.userCounter").item
+        self.users = {}
+        user_counter_ids = self.dm_service.GetObjects(self.dm_session, 0, "usageCounter.userCounter").item
+        user_restrict_ids = self.dm_service.GetObjects(self.dm_session, 0, "usageControl.userRestrict").item
         
-        for user_id in user_ids:
-            user_counter = self.dm_service.GetObject(self.dm_session, 0, user_id, {"item" : ["copyBlack", "copyBlackA3Over", "printBlack", "printerBlackA3Over", "scannerBlack", "scannerBlackA3Over"]})
-            tmp_user_statistics = UserStatistics()
+        for user_counter_id in user_counter_ids:
+            try:
+                user_counter = self.dm_service.GetObject(self.dm_session, 0, user_counter_id, {"item" : ["copyBlack", "copyBlackA3Over", "printerBlack", "printerBlackA3Over", "scannerBlack", "scannerBlackA3Over"]})
+                user_internal_name = user_counter.name
+                tmp_user_stats = UserStatistics.from_soap_object(user_counter)
+                tmp_user_stats.modified = False
+                user_properties = self.ud_service.GetObjectsProps(self.ud_session, { "item" : ["entry:"+str(user_internal_name)] }, { "item" : [ "name", "auth:name" ] }, {})
+                tmp_user = User.from_soap_object(user_properties)
+                tmp_user.internal_name = user_internal_name
+                tmp_user.stats = tmp_user_stats
+                self.users[user_internal_name] = tmp_user
+            except:
+                print "Could not read user " + str(user_counter_id)
+        for user_restrict_id in user_restrict_ids:
+            try:
+                user_restrict = self.dm_service.GetObject(self.dm_session, 0, user_restrict_id, {"item" : ["copyBlack", "printerBlack", "scannerBlack", "localStorage"]})
+                if user_restrict.name in self.users:
+                    self.users[user_restrict.name].restrict = UserRestrict.from_soap_object(user_restrict)
+            except:
+                print "Could not read user " + str(user_counter_id)
+            
 
+    def __del__(self):
+        self.dm_service.TerminateSession(self.dm_session)
+        self.ud_service.TerminateSession(self.ud_session)
+        print "Sessions closed"
 
     def add_user(self, user):
         """Add object `user` of type :class:`User` as user account."""
@@ -291,11 +367,10 @@ class UserMaintSession(object):
         If `req_statistics_info` is ``True``, the user's printing statistics are
         requested.
         """
-        return self._get_user_info(user_code=user_code,
-                req_user_code=req_user_code,
-                req_user_code_name=req_user_code_name,
-                req_restrict_info=req_restrict_info,
-                req_statistics_info=req_statistics_info)[0]
+        for user_key, user in self.users.iteritem():
+            if user.user_code == user_code:
+                return user
+        return None
 
     def get_user_infos(self, req_user_code=True,
             req_user_code_name=True, req_restrict_info=True,
@@ -310,16 +385,7 @@ class UserMaintSession(object):
         If `req_statistics_info` is ``True``, the users' printing statistics are
         requested.
         """
-        return self._get_user_info(req_user_code=req_user_code,
-                req_user_code_name=req_user_code_name,
-                req_restrict_info=req_restrict_info,
-                req_statistics_info=req_statistics_info)
-
-    def _get_user_info(self, user_code='', req_user_code=True,
-            req_user_code_name=True, req_restrict_info=True,
-            req_statistics_info=True):
-
-        return users
+        return self.users.values()
 
     def set_user_info(self, user):
         """Modify user account associated with `user`, which is an instance of
