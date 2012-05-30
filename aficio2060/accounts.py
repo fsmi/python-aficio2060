@@ -28,6 +28,7 @@ restrictions (respectively).
 
 
 from suds.client import Client
+import logging
 
 
 class UserMaintError(RuntimeError):
@@ -215,6 +216,14 @@ class UserRestrict(object):
             if item.name == "localStorage" and item.value == "OFF":
                 grant_storage = True
         return UserRestrict(grant_copy, grant_printer, grant_scanner, grant_storage)
+        
+    def to_fieldList(self):
+        return { "item" : [
+            { "name" : "copyBlack", "value" : "OFF" if self.grant_copy else "ON", "type" : "DM_FIELD_ENUM" },
+            { "name" : "printerBlack", "value" : "OFF" if self.grant_printer else "ON", "type" : "DM_FIELD_ENUM" },
+            { "name" : "scannerBlack", "value" : "OFF" if self.grant_scanner else "ON", "type" : "DM_FIELD_ENUM" },
+            { "name" : "localStorage", "value" : "OFF" if self.grant_storage else "ON", "type" : "DM_FIELD_ENUM" }
+        ]}
 
 class User(object):
     """This class represents a single user in the printer's user accounting.  It
@@ -295,20 +304,35 @@ class User(object):
                 code = int(item.propVal)
         return User(code, name)
 
+    def to_propListList(self):
+        return { "item" : { "item" : [
+                    { "propName" : "entryType", "propVal" : "user" },
+                    { "propName" : "isDestination", "propVal" : "true" },
+                    { "propName" : "isSender", "propVal" : "true" },
+                    { "propName" : "name", "propVal" : self.name },
+                    { "propName" : "longName", "propVal" : self.name },
+                    { "propName" : "auth:name", "propVal" : self.user_code },
+                    { "propName" : "auth:password", "propVal" : "m9gZWJtcmJtaW9oZ3JseWdrdGZnbnByZW9iZHhqdnJwaG13dXVoZnB1cWF3YXRwanBpbW5ocGx3aWFraWthcHJvbGpydXRldm9qaHZ1aHNpYHNhZ2hmaHdzbmBpYWh2aWlkZWh5dmF2ZGplaXdgemZyZm51cGpibWZnYHFgc2hocHRpdGxrbmp4=" },
+                    { "propName" : "passwordEncoding", "propVal" : "gwpwes002" }
+                    ]}}
 class UserMaintSession(object):
     """
     Objects of this class represent a user maintainance session. They provide
     methods to retrieve and modify user accounts.
 
     There is no session on the network level: Each request initiates a
-    self-contained XML-RPC request.
+    self-contained SOAP request. There is a session on the API level thought.
     """
-    BUSY_CODE = 'systemBusy'
 
     def __init__(self, pass_string, wsdl):
         self.pass_string = pass_string
         self.wsdl = wsdl if wsdl.startswith("file://") else "file://" + wsdl
-        self.soap_client = Client(self.wsdl, cache=None)
+        
+        logging.basicConfig(level=logging.ERROR)
+        logging.getLogger('suds.client').setLevel(logging.ERROR)
+        logging.disable(logging.ERROR)
+
+        self.soap_client = Client(self.wsdl)
         self.dm_service = self.soap_client.service["DeviceManagementService"]
         self.ud_service = self.soap_client.service["UserDirectoryService"]
         self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut
@@ -330,24 +354,42 @@ class UserMaintSession(object):
                 tmp_user.stats = tmp_user_stats
                 self.users[user_internal_name] = tmp_user
             except:
-                print "Could not read user " + str(user_counter_id)
+                pass
+        
         for user_restrict_id in user_restrict_ids:
             try:
                 user_restrict = self.dm_service.GetObject(self.dm_session, 0, user_restrict_id, {"item" : ["copyBlack", "printerBlack", "scannerBlack", "localStorage"]})
                 if user_restrict.name in self.users:
                     self.users[user_restrict.name].restrict = UserRestrict.from_soap_object(user_restrict)
             except:
-                print "Could not read user " + str(user_counter_id)
-            
-
-    def __del__(self):
+                pass
+        
         self.dm_service.TerminateSession(self.dm_session)
+        del self.dm_session
         self.ud_service.TerminateSession(self.ud_session)
-        print "Sessions closed"
+        del self.ud_session
+        
+    def __del__(self):
+        if hasattr(self, 'dm_service') and hasattr(self, 'dm_session'):
+            self.dm_service.TerminateSession(self.dm_session)
+        if hasattr(self, 'ud_service') and hasattr(self, 'ud_session'):
+            self.ud_service.TerminateSession(self.ud_session)
 
     def add_user(self, user):
         """Add object `user` of type :class:`User` as user account."""
-
+        self.ud_session = self.ud_service.StartSession(self.pass_string, 0, "X").stringOut
+        response = self.ud_service.PutObjects(self.ud_session, "entry", {}, user.to_propListList(), {})
+        user.internal_name = response.item
+        self.ud_service.TerminateSession(self.ud_session)
+        
+        self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut
+        lock = self.dm_service.LockDevice(self.dm_session, 0, 0)
+        response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : user.internal_name, 
+                                                                      "class" : "usageControl.userRestrict", 
+                                                                      "oid" : "110002"+str(user.internal_name),
+                                                                      "fieldList" : user.restrict.to_fieldList },
+                                                                    { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
+        unlock = self.dm_service.UnlockDevice(self.dm_session, 0)
         user.notify_flushed()
 
     def delete_user(self, user_code):
@@ -367,7 +409,7 @@ class UserMaintSession(object):
         If `req_statistics_info` is ``True``, the user's printing statistics are
         requested.
         """
-        for user_key, user in self.users.iteritem():
+        for user_internal_name, user in self.users.iteritem():
             if user.user_code == user_code:
                 return user
         return None
