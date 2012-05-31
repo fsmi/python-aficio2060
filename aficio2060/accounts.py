@@ -333,7 +333,7 @@ class UserMaintSession(object):
         if not "SUDS_DEBUG" in os.environ.keys():
             logging.disable(logging.ERROR)
 
-        self.soap_client = Client(self.wsdl)
+        self.soap_client = Client(self.wsdl, cache=None)
         self.dm_service = self.soap_client.service["DeviceManagementService"]
         self.ud_service = self.soap_client.service["UserDirectoryService"]
         self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut

@@ -386,7 +386,7 @@
 					<xs:sequence>
 						<xs:element name="sessionId" type="xs:string" />
 						<xs:element name="objectId" type="xs:string"/>
-						<xs:element name="propListList">
+						<xs:element name="propList">
 							<xs:complexType>
 								<xs:sequence>
 									<xs:element name="item" minOccurs="1" maxOccurs="unbounded">
