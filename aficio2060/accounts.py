@@ -29,7 +29,7 @@ restrictions (respectively).
 
 from suds.client import Client
 import logging
-
+import os
 
 class UserMaintError(RuntimeError):
     def __init__(self, msg, code=None):
@@ -329,8 +329,9 @@ class UserMaintSession(object):
         self.wsdl = wsdl if wsdl.startswith("file://") else "file://" + wsdl
         
         logging.basicConfig(level=logging.ERROR)
-        logging.getLogger('suds.client').setLevel(logging.ERROR)
-        logging.disable(logging.ERROR)
+        logging.getLogger('suds.client').setLevel(logging.DEBUG)
+        if not "SUDS_DEBUG" in os.environ.keys():
+            logging.disable(logging.ERROR)
 
         self.soap_client = Client(self.wsdl)
         self.dm_service = self.soap_client.service["DeviceManagementService"]
@@ -381,19 +382,34 @@ class UserMaintSession(object):
         response = self.ud_service.PutObjects(self.ud_session, "entry", {}, user.to_propListList(), {})
         user.internal_name = response.item
         self.ud_service.TerminateSession(self.ud_session)
+        del self.ud_session
         
         self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut
         lock = self.dm_service.LockDevice(self.dm_session, 0, 0)
-        response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : user.internal_name, 
+        response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : int(user.internal_name), 
                                                                       "class" : "usageControl.userRestrict", 
-                                                                      "oid" : "110002"+str(user.internal_name),
-                                                                      "fieldList" : user.restrict.to_fieldList },
+                                                                      "oid" : int("110002"+str(user.internal_name)),
+                                                                      "fieldList" : user.restrict.to_fieldList() },
                                                                     { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
         unlock = self.dm_service.UnlockDevice(self.dm_session, 0)
+        self.dm_service.TerminateSession(self.dm_session)
+        del self.dm_session
+        
         user.notify_flushed()
 
     def delete_user(self, user_code):
         """Delete user account with user code number `user_code`."""
+        user = self.get_user_info(user_code)
+        if user == None:
+            return
+       
+        self.ud_session = self.ud_service.StartSession(self.pass_string, 0, "X").stringOut
+        
+        response = self.ud_service.PutObjectProps(self.ud_session, "entry:" + str(user.internal_name),
+                                                    { "item" : { "propName" : "auth:", "propVal" : "false" } },
+                                                    { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
+        self.ud_service.TerminateSession(self.ud_session)
+        del self.ud_session
 
 
     def get_user_info(self, user_code, req_user_code=True,
@@ -409,7 +425,7 @@ class UserMaintSession(object):
         If `req_statistics_info` is ``True``, the user's printing statistics are
         requested.
         """
-        for user_internal_name, user in self.users.iteritem():
+        for user_internal_name, user in self.users.iteritems():
             if user.user_code == user_code:
                 return user
         return None
