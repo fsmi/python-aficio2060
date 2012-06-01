@@ -198,37 +198,37 @@ class UserRestrict(object):
         return '<UserRestrict c%d, p%d, s%d, st%d>' % (self.grant_copy,
                 self.grant_printer, self.grant_scanner, self.grant_storage)
     
-    def get_grant_copy(self):
+    def _get_grant_copy(self):
         return self._grant_copy
-    def set_grant_copy(self, copy):
+    def _set_grant_copy(self, copy):
         if copy != self._grant_copy
             self.modified = True
         self._grant_copy = copy
-    grant_copy = property(get_grant_copy, set_grant_copy)
+    grant_copy = property(_get_grant_copy, _set_grant_copy)
     
-    def get_grant_printer(self):
+    def _get_grant_printer(self):
         return self._grant_printer
-    def set_grant_printer(self, printer)
+    def _set_grant_printer(self, printer)
         if printer != self._grant_printer
             self.modified = True
         self._grant_printer = printer
-    grant_printer = property(get_grant_printer, set_grant_printer)
+    grant_printer = property(_get_grant_printer, _set_grant_printer)
     
-    def get_grant_scanner(self):
+    def _get_grant_scanner(self):
         return self._grant_scanner
-    def set_grant_scanner(self, scanner)
+    def _set_grant_scanner(self, scanner)
         if scanner != self._grant_scanner
             self.modified = True
         self._grant_scanner = scanner
-    grant_scanner = property(get_grant_scanner, set_grant_scanner)
+    grant_scanner = property(_get_grant_scanner, _set_grant_scanner)
     
-    def get_grant_storage(self):
+    def _get_grant_storage(self):
         return self._grant_storage
-    def set_grant_storage(self, storage)
+    def _set_grant_storage(self, storage)
         if storage != self._grant_storage
             self.modified = True
         self._grant_storage = storage
-    grant_storage = property(get_grant_storage, set_grant_storage)
+    grant_storage = property(_get_grant_storage, _set_grant_storage)
     
     def revoke_all(self):
         """Revoke all privileges."""
@@ -332,6 +332,20 @@ class User(object):
     def _get_internal_name(self):
         return self._internal_name
     internal_name = property(_get_internal_name, _set_internal_name)
+    
+    def _get_stats(self):
+        return self._stats
+    def _set_stats(self, stats):
+        self._stats = stats
+        self._stats.modified = True
+    stats = property(_get_stats, _set_stats)
+    
+    def _get_restriction(self):
+        return self._restriction
+    def _set_restriction(self, restriction)
+        self._restriction = restriction
+        self._restriction.modified = True
+    restriction = property(_get_restriction, _set_restriction)
 
     def __repr__(self):
         return '<User "%s" (#%s, %s, %s, %s)>' % (unicode(self.name),

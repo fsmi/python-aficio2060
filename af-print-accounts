@@ -2,7 +2,7 @@
 # vim:set ft=python ts=4 sw=4 et fileencoding=utf-8:
 
 # af-print-accounts -- Command-line tool to generate a list of accounts on a
-#   Ricoh Aficio 1075.
+#   Ricoh Aficio 2060.
 #
 # Copyright (C) 2010 Fabian Knittel <fabian.knittel@lettink.de>
 #

@@ -1,6 +1,6 @@
 # vim:set ft=python ts=4 sw=4 et fileencoding=utf-8:
 
-# aficio1075/config_utils.py -- Support functions used for aficio1075.conf
+# aficio1075/config_utils.py -- Support functions used for aficio2060.conf
 #   parsing.
 #
 # Copyright (C) 2010 Fabian Knittel <fabian.knittel@lettink.de>

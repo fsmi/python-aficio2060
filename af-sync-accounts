@@ -1,0 +1,214 @@
+#!/usr/bin/python
+# vim:set ft=python ts=4 sw=4 et fileencoding=utf-8:
+
+# af-sync-accounts-to-unix-groups -- Synchronise the list of printer accounts
+#  with the list of unix users and their membership in unix groups.
+#
+# Copyright (C) 2008 Fabian Knittel <fabian.knittel@lettink.de>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
+
+# Depends on aficio.accounts
+
+from optparse import OptionParser
+from aficio2060 import accounts
+from aficio2060 import config_utils
+from ConfigParser import SafeConfigParser
+import pwd
+import grp
+import sys
+import codecs
+import subprocess
+
+sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
+sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+
+
+def call_hook(hook_script):
+    try:
+        retcode = subprocess.call(hook_script, shell=True)
+        if retcode < 0:
+            print "Hook script was terminated by signal", -retcode
+        elif retcode != 0:
+            print "Hook script returned", retcode
+    except OSError, e:
+            print "Execution of hook script failed:", e
+
+def main():
+    parser = OptionParser()
+    parser.add_option("--config", action = "store", dest = "config_file",
+            help = "Path of configuration file",
+            default = config_utils.CONFIG_PATH)
+    parser.add_option("--wsdl", action = "store", dest = "wsdl",
+            help = "WSDL file of the Aficio printer")
+    parser.add_option("--pass-string", action = "store", dest = "pass_string",
+            help = "Encoded password for the Aficio printer")
+    parser.add_option("--simulate", action = "store_true",
+            dest = "simulate", help = "Only simulate the actions")
+    parser.add_option("--hook-enabled", action = "store", dest = "hook_enabled",
+            help = "Script hook called when at least one account was enabled.")
+    (options, args) = parser.parse_args()
+    if len(args) != 0:
+        parser.error("incorrect number of arguments")
+
+    cf = SafeConfigParser()
+    cf.read(options.config_file)
+
+    if options.wsdl is not None:
+        cf.set('printer', 'wsdl', options.wsdl)
+    if options.pass_string is not None:
+        cf.set('printer', 'pass_string', options.pass_string)
+    if options.hook_enabled is not None:
+        cf.set('unix_sync', 'hook_enabled', options.hook_enabled)
+
+    if not cf.has_section('printer') or \
+            not cf.has_option('printer', 'wsdl'):
+        parser.error("wsdl location not specified")
+    if not cf.has_section('printer') or \
+            not cf.has_option('printer', 'pass_string'):
+        parser.error("pass_string not specified")
+
+    if not cf.has_section('unix_sync'):
+        parser.error("configuration file misses unix_sync section")
+    if not cf.has_option('unix_sync', 'user_code_regions'):
+        parser.error("user_code_regions not specified")
+    else:
+        user_code_regions = config_utils.str_to_code_regions(
+                cf.get('unix_sync', 'user_code_regions'))
+    if not cf.has_option('unix_sync', 'valid_groups'):
+        parser.error("valid_groups not specified")
+    else:
+        valid_groups = config_utils.comma_string_to_list(
+                cf.get('unix_sync', 'valid_groups'))
+
+    if options.simulate:
+        print "note: only simulating commands."
+
+    valid_users = []
+    for valid_group in valid_groups:
+        valid_users += grp.getgrnam(valid_group).gr_mem
+
+    um = accounts.UserMaintSession(pass_string = cf.get('printer', 'pass_string'),
+            wsdl = cf.get('printer', 'wsdl'))
+
+    # Create list of accounts that need to be disabled or removed.
+    #
+
+    accts_to_disable = []
+
+    accts = config_utils.list_to_dict('user_code', um.get_user_infos())
+    for acct in accts.values():
+        if not config_utils.user_code_within_regions(acct.user_code,
+                user_code_regions):
+            # Skip
+            continue
+
+        # Does the user code have a matching UNIX account?
+        try:
+            pwentry = pwd.getpwuid(acct.user_code)
+        except KeyError:
+            accts_to_disable.append(acct)
+            continue
+
+        # Is the account a member of one of the relevant groups?
+        if pwentry.pw_name not in valid_users:
+            accts_to_disable.append(acct)
+            continue
+
+    # Disable or remove the accounts.
+    #
+
+    for acct in accts_to_disable:
+        if acct.stats.is_zero():
+            print "Removing user %s (%u)" % (acct.name, acct.user_code)
+            # Counters are zero, remove the account.
+            if not options.simulate:
+                um.delete_user(acct.user_code)
+        else:
+            # Counters are non-zero, wait for it to be accounted for.
+            if acct.restrict.has_any_permissions():
+                # Not disabled yet, so disable the account.
+                print "Disabling user %s (%u)" % (acct.name, acct.user_code)
+                acct.restrict.revoke_all()
+                if not options.simulate:
+                    um.set_user_info(acct)
+
+    # Create list of accounts that need to be created or re-activated.
+    #
+
+    users_to_add = []
+    accts_to_activate = []
+
+    for pwentry in pwd.getpwall():
+        if not config_utils.user_code_within_regions(pwentry.pw_uid,
+                user_code_regions):
+            # Skip
+            continue
+
+        if pwentry.pw_name not in valid_users:
+            # User is not member of the relevant groups: Skip.
+            continue
+
+        if pwentry.pw_uid not in accts:
+            # User has no account yet.
+            users_to_add.append(pwentry)
+            continue
+
+        acct = accts[pwentry.pw_uid]
+        if not acct.restrict.has_any_permissions():
+            # User's account is disabled.
+            accts_to_activate.append(acct)
+            continue
+
+
+    # Create and activate accounts.
+    #
+
+    # Default restrictions / permissions.
+    acct_restr = accounts.UserRestrict(grant_copy = True, grant_printer = True,
+            grant_scanner = True)
+
+    # Create new accounts.
+    for pwentry in users_to_add:
+        name = unicode(pwentry.pw_gecos, 'utf-8')
+        if len(name) > accounts.User.MAX_NAME_LEN:
+            name = name[0:accounts.User.MAX_NAME_LEN - 1]
+        print "Adding user %s (%u)" % (name, pwentry.pw_uid)
+        acct = accounts.User(pwentry.pw_uid, name, acct_restr)
+        if not options.simulate:
+            um.add_user(acct)
+
+    # Activate existing accounts.
+    for acct in accts_to_activate:
+        print "Activating user %s (%u)" % (acct.name, acct.user_code)
+        acct.restrict = acct_restr
+        if not options.simulate:
+            um.set_user_info(acct)
+
+    # Call the hook script iff at least one account was enabled or disabled.
+    if (len(users_to_add) > 0 or \
+            len(accts_to_activate) > 0 or \
+            len(accts_to_disable) > 0) and \
+            cf.has_option('unix_sync', 'hook_enabled'):
+        hook_script = cf.get('unix_sync', 'hook_enabled')
+        if not options.simulate:
+            print "Calling hook '%s' ..." % hook_script
+            call_hook(hook_script)
+        else:
+            print "Skipping hook '%s', because we're only simulating." % \
+                    hook_script
+
+if __name__ == '__main__':
+    main()
