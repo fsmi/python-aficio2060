@@ -29,7 +29,7 @@ restrictions (respectively).
 
 from suds.client import Client
 import logging
-import os
+import os, sys, traceback
 
 class UserMaintError(RuntimeError):
     def __init__(self, msg, code=None):
@@ -188,10 +188,10 @@ class UserRestrict(object):
     """
     def __init__(self, grant_copy=False, grant_printer=False,
             grant_scanner=False, grant_storage=False):
-        self.grant_copy = grant_copy
-        self.grant_printer = grant_printer
-        self.grant_scanner = grant_scanner
-        self.grant_storage = grant_storage
+        self._grant_copy = grant_copy
+        self._grant_printer = grant_printer
+        self._grant_scanner = grant_scanner
+        self._grant_storage = grant_storage
         self.modified = False
 
     def __repr__(self):
@@ -337,14 +337,16 @@ class User(object):
         return self._stats
     def _set_stats(self, stats):
         self._stats = stats
-        self._stats.modified = True
+        if self._stats is not None:
+            self._stats.modified = True
     stats = property(_get_stats, _set_stats)
     
     def _get_restriction(self):
         return self._restriction
     def _set_restriction(self, restriction):
         self._restriction = restriction
-        self._restriction.modified = True
+        if self._restriction is not None:
+            self._restriction.modified = True
     restriction = property(_get_restriction, _set_restriction)
 
     def __repr__(self):
@@ -358,7 +360,7 @@ class User(object):
         code = ""
         for item in items:
             if item.propName == "name":
-                name = str(item.propVal)
+                name = unicode(item.propVal)
             if item.propName == "auth:name":
                 code = int(item.propVal)
         return User(code, name)
@@ -413,7 +415,7 @@ class UserMaintSession(object):
                 tmp_user.internal_name = user_internal_name
                 tmp_user.stats = tmp_user_stats
                 self.users[user_internal_name] = tmp_user
-            except:
+            except Exception, e:
                 pass
         
         for user_restrict_id in user_restrict_ids:
@@ -421,7 +423,7 @@ class UserMaintSession(object):
                 user_restrict = self.dm_service.GetObject(self.dm_session, 0, user_restrict_id, {"item" : ["copyBlack", "printerBlack", "scannerBlack", "localStorage"]})
                 if user_restrict.name in self.users:
                     self.users[user_restrict.name].restrict = UserRestrict.from_soap_object(user_restrict)
-            except:
+            except Exception, e:
                 pass
         
         self.dm_service.TerminateSession(self.dm_session)
