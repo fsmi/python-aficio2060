@@ -62,7 +62,7 @@ class UserStatistics(object):
         self._print_a3 = print_a3
         self._scan_a4 = scan_a4
         self._scan_a3 = scan_a3
-        self.modified = True
+        self.modified = False
 
     def __repr__(self):
         return '<UserStatistics c%u,%u p%u,%u s%u,%u %s>' % (self.copy_a4,
@@ -160,6 +160,16 @@ class UserStatistics(object):
             if item.name == "scannerBlackA3Over":
                 scan_a3 = int(item.value)
         return UserStatistics(copy_a4, copy_a3, print_a4, print_a3, scan_a4, scan_a3)
+        
+    def to_fieldList(self):
+        return { "item" : [
+            { "name" : "copyBlack", "value" : str(self.copy_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "copyBlackA3Over", "value" : str(self.copy_a3), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "printerBlack", "value" : str(self.printer_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "printerBlackA3Over", "value" : str(self.printer_a3), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "scannerBlack", "value" : str(self.scanner_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "scannerBlackA3Over", "value" : str(self.scanner_a3), "type" : "DM_FIELD_UNSIGNED_INT" }
+        ]}
 
 class UserRestrict(object):
     """This class represents a set of access restrictions.
@@ -182,11 +192,44 @@ class UserRestrict(object):
         self.grant_printer = grant_printer
         self.grant_scanner = grant_scanner
         self.grant_storage = grant_storage
+        self.modified = False
 
     def __repr__(self):
         return '<UserRestrict c%d, p%d, s%d, st%d>' % (self.grant_copy,
                 self.grant_printer, self.grant_scanner, self.grant_storage)
-
+    
+    def get_grant_copy(self):
+        return self._grant_copy
+    def set_grant_copy(self, copy):
+        if copy != self._grant_copy
+            self.modified = True
+        self._grant_copy = copy
+    grant_copy = property(get_grant_copy, set_grant_copy)
+    
+    def get_grant_printer(self):
+        return self._grant_printer
+    def set_grant_printer(self, printer)
+        if printer != self._grant_printer
+            self.modified = True
+        self._grant_printer = printer
+    grant_printer = property(get_grant_printer, set_grant_printer)
+    
+    def get_grant_scanner(self):
+        return self._grant_scanner
+    def set_grant_scanner(self, scanner)
+        if scanner != self._grant_scanner
+            self.modified = True
+        self._grant_scanner = scanner
+    grant_scanner = property(get_grant_scanner, set_grant_scanner)
+    
+    def get_grant_storage(self):
+        return self._grant_storage
+    def set_grant_storage(self, storage)
+        if storage != self._grant_storage
+            self.modified = True
+        self._grant_storage = storage
+    grant_storage = property(get_grant_storage, set_grant_storage)
+    
     def revoke_all(self):
         """Revoke all privileges."""
         self.grant_copy = False
@@ -272,6 +315,8 @@ class User(object):
             del self._orig_user_code
         if self.stats is not None and self.stats.modified:
             self.stats.modified = False
+        if self.restrict is not None and self.restrict.modified:
+            self.restrict.modified = False
 
     def _set_name(self, name):
         if len(name) > self.MAX_NAME_LEN:
@@ -450,4 +495,25 @@ class UserMaintSession(object):
         :class:`User`.
         Throws :class:`UserMaintError` in case of an error.
         """
+        self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut
+        lock = self.dm_service.LockDevice(self.dm_session, 0, 0)
+        if user.restrict.modified:
+            response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : int(user.internal_name), 
+                                                                          "class" : "usageControl.userRestrict", 
+                                                                          "oid" : int("110002"+str(user.internal_name)),
+                                                                          "fieldList" : user.restrict.to_fieldList() },
+                                                                        { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
+            if response.returnValue is not "OK":
+                raise UserMaintError("Could not update the user restrictions for user " + str(user.name))
+        if user.stats.modified:
+            response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : int(user.internal_name), 
+                                                                          "class" : "usageCounter.userCounter", 
+                                                                          "oid" : int("110002"+str(user.internal_name)),
+                                                                          "fieldList" : user.stats.to_fieldList() },
+                                                                        { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
+            if response.returnValue is not "OK":
+                raise UserMaintError("Could not update the user counter for user " + str(user.name))
+        unlock = self.dm_service.UnlockDevice(self.dm_session, 0)
+        self.dm_service.TerminateSession(self.dm_session)
+        del self.dm_session
         user.notify_flushed()
