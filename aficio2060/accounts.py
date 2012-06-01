@@ -201,31 +201,31 @@ class UserRestrict(object):
     def _get_grant_copy(self):
         return self._grant_copy
     def _set_grant_copy(self, copy):
-        if copy != self._grant_copy
+        if copy != self._grant_copy:
             self.modified = True
         self._grant_copy = copy
     grant_copy = property(_get_grant_copy, _set_grant_copy)
     
     def _get_grant_printer(self):
         return self._grant_printer
-    def _set_grant_printer(self, printer)
-        if printer != self._grant_printer
+    def _set_grant_printer(self, printer):
+        if printer != self._grant_printer:
             self.modified = True
         self._grant_printer = printer
     grant_printer = property(_get_grant_printer, _set_grant_printer)
     
     def _get_grant_scanner(self):
         return self._grant_scanner
-    def _set_grant_scanner(self, scanner)
-        if scanner != self._grant_scanner
+    def _set_grant_scanner(self, scanner):
+        if scanner != self._grant_scanner:
             self.modified = True
         self._grant_scanner = scanner
     grant_scanner = property(_get_grant_scanner, _set_grant_scanner)
     
     def _get_grant_storage(self):
         return self._grant_storage
-    def _set_grant_storage(self, storage)
-        if storage != self._grant_storage
+    def _set_grant_storage(self, storage):
+        if storage != self._grant_storage:
             self.modified = True
         self._grant_storage = storage
     grant_storage = property(_get_grant_storage, _set_grant_storage)
@@ -255,7 +255,7 @@ class UserRestrict(object):
             if item.name == "printerBlack" and item.value == "OFF":
                 grant_printer = True
             if item.name == "scannerBlack" and item.value == "OFF":
-                grant_scanner = Truehostname
+                grant_scanner = True
             if item.name == "localStorage" and item.value == "OFF":
                 grant_storage = True
         return UserRestrict(grant_copy, grant_printer, grant_scanner, grant_storage)
@@ -342,7 +342,7 @@ class User(object):
     
     def _get_restriction(self):
         return self._restriction
-    def _set_restriction(self, restriction)
+    def _set_restriction(self, restriction):
         self._restriction = restriction
         self._restriction.modified = True
     restriction = property(_get_restriction, _set_restriction)
