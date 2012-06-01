@@ -255,7 +255,7 @@ class UserRestrict(object):
             if item.name == "printerBlack" and item.value == "OFF":
                 grant_printer = True
             if item.name == "scannerBlack" and item.value == "OFF":
-                grant_scanner = True
+                grant_scanner = Truehostname
             if item.name == "localStorage" and item.value == "OFF":
                 grant_storage = True
         return UserRestrict(grant_copy, grant_printer, grant_scanner, grant_storage)
