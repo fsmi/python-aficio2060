@@ -171,11 +171,14 @@ def main():
         else:
             print u"User %s (%u) already enabled" % (acct.name, acct.user_code)
     elif mode == 'reset':
-        # Reset the counters for the account by removing and adding it.
+        # Reset the counters for the account
         acct = um.get_user_info(options.user_code)
-        print u"Resetting user %s (%u)" % (acct.name, acct.user_code)
-        um.delete_user(acct.user_code)
-        um.add_user(acct)
+        if acct.stats != None:
+            print u"Resetting user %s (%u)" % (acct.name, acct.user_code)
+            acct.stats.set_zero()
+            um.set_user_info(acct)
+        else:
+            print u"Could not reset user %s (%u)" % (acct.name, acct.user_code)
     elif mode == 'add':
         # Add new account
         if options.name is None:

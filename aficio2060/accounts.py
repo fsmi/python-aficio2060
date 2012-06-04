@@ -136,6 +136,7 @@ class UserStatistics(object):
         return self.copy_a4_total == 0 and \
                 self.print_a4_total == 0 and \
                 self.scan_a4_total == 0
+                
 
     @staticmethod
     def from_soap_object(obj):
@@ -165,10 +166,10 @@ class UserStatistics(object):
         return { "item" : [
             { "name" : "copyBlack", "value" : str(self.copy_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
             { "name" : "copyBlackA3Over", "value" : str(self.copy_a3), "type" : "DM_FIELD_UNSIGNED_INT" },
-            { "name" : "printerBlack", "value" : str(self.printer_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
-            { "name" : "printerBlackA3Over", "value" : str(self.printer_a3), "type" : "DM_FIELD_UNSIGNED_INT" },
-            { "name" : "scannerBlack", "value" : str(self.scanner_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
-            { "name" : "scannerBlackA3Over", "value" : str(self.scanner_a3), "type" : "DM_FIELD_UNSIGNED_INT" }
+            { "name" : "printerBlack", "value" : str(self.print_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "printerBlackA3Over", "value" : str(self.print_a3), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "scannerBlack", "value" : str(self.scan_a4), "type" : "DM_FIELD_UNSIGNED_INT" },
+            { "name" : "scannerBlackA3Over", "value" : str(self.scan_a3), "type" : "DM_FIELD_UNSIGNED_INT" }
         ]}
 
 class UserRestrict(object):
@@ -281,11 +282,11 @@ class User(object):
     MAX_NAME_LEN = 20
 
     def __init__(self, user_code, name, restrict=None, stats=None, internal_name=None):
-        self.user_code = user_code
-        self.name = name
-        self.internal_name = internal_name
-        self.restrict = restrict
-        self.stats = stats
+        self._user_code = user_code
+        self.__name = name
+        self._internal_name = internal_name
+        self._restrict = restrict
+        self._stats = stats
 
     def _set_user_code(self, user_code):
         if not hasattr(self, '_orig_user_code'):
@@ -341,13 +342,13 @@ class User(object):
             self._stats.modified = True
     stats = property(_get_stats, _set_stats)
     
-    def _get_restriction(self):
-        return self._restriction
-    def _set_restriction(self, restriction):
-        self._restriction = restriction
-        if self._restriction is not None:
-            self._restriction.modified = True
-    restriction = property(_get_restriction, _set_restriction)
+    def _get_restrict(self):
+        return self._restrict
+    def _set_restrict(self, restrict):
+        self._restrict = restrict
+        if self._restrict is not None:
+            self._restrict.modified = True
+    restrict = property(_get_restrict, _set_restrict)
 
     def __repr__(self):
         return '<User "%s" (#%s, %s, %s, %s)>' % (unicode(self.name),
@@ -391,8 +392,7 @@ class UserMaintSession(object):
         
         logging.basicConfig(level=logging.ERROR)
         logging.getLogger('suds.client').setLevel(logging.DEBUG)
-        if not "SUDS_DEBUG" in os.environ.keys():
-            logging.disable(logging.ERROR)
+        logging.disable(logging.ERROR)
 
         self.soap_client = Client(self.wsdl, cache=None)
         self.dm_service = self.soap_client.service["DeviceManagementService"]
@@ -430,6 +430,9 @@ class UserMaintSession(object):
         del self.dm_session
         self.ud_service.TerminateSession(self.ud_session)
         del self.ud_session
+        
+        if "SUDS_DEBUG" in os.environ.keys():
+            logging.disable(logging.NOTSET)
         
     def __del__(self):
         if hasattr(self, 'dm_service') and hasattr(self, 'dm_session'):
@@ -473,9 +476,7 @@ class UserMaintSession(object):
         del self.ud_session
 
 
-    def get_user_info(self, user_code, req_user_code=True,
-            req_user_code_name=True, req_restrict_info=True,
-            req_statistics_info=True):
+    def get_user_info(self, user_code):
         """Get information about user account with user code number `user_code`.
         Returns a :class:`User` instance in case the user was found or else
         throws :class:`UserMaintError`.
@@ -491,9 +492,7 @@ class UserMaintSession(object):
                 return user
         return None
 
-    def get_user_infos(self, req_user_code=True,
-            req_user_code_name=True, req_restrict_info=True,
-            req_statistics_info=True):
+    def get_user_infos(self):
         """Request information about all user accounts.
         Returns a list of :class:`User` instances. Throws
         :class:`UserMaintError` in case of an error.
@@ -519,15 +518,15 @@ class UserMaintSession(object):
                                                                           "oid" : int("110002"+str(user.internal_name)),
                                                                           "fieldList" : user.restrict.to_fieldList() },
                                                                         { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
-            if response.returnValue is not "OK":
+            if response.returnValue != "OK":
                 raise UserMaintError("Could not update the user restrictions for user " + str(user.name))
         if user.stats.modified:
             response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : int(user.internal_name), 
                                                                           "class" : "usageCounter.userCounter", 
-                                                                          "oid" : int("110002"+str(user.internal_name)),
+                                                                          "oid" : int("111002"+str(user.internal_name)),
                                                                           "fieldList" : user.stats.to_fieldList() },
                                                                         { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
-            if response.returnValue is not "OK":
+            if response.returnValue != "OK":
                 raise UserMaintError("Could not update the user counter for user " + str(user.name))
         unlock = self.dm_service.UnlockDevice(self.dm_session, 0)
         self.dm_service.TerminateSession(self.dm_session)
