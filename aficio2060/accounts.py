@@ -373,9 +373,7 @@ class User(object):
                     { "propName" : "isSender", "propVal" : "true" },
                     { "propName" : "name", "propVal" : self.name },
                     { "propName" : "longName", "propVal" : self.name },
-                    { "propName" : "auth:name", "propVal" : self.user_code },
-                    { "propName" : "auth:password", "propVal" : "m9gZWJtcmJtaW9oZ3JseWdrdGZnbnByZW9iZHhqdnJwaG13dXVoZnB1cWF3YXRwanBpbW5ocGx3aWFraWthcHJvbGpydXRldm9qaHZ1aHNpYHNhZ2hmaHdzbmBpYWh2aWlkZWh5dmF2ZGplaXdgemZyZm51cGpibWZnYHFgc2hocHRpdGxrbmp4=" },
-                    { "propName" : "passwordEncoding", "propVal" : "gwpwes002" }
+                    { "propName" : "auth:name", "propVal" : self.user_code }
                     ]}}
 class UserMaintSession(object):
     """

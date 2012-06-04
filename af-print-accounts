@@ -190,7 +190,7 @@ def main():
                 cf.get('unix_sync', 'user_code_regions'))
 
 
-    um = accounts.UserMaintSession(passwd = cf.get('printer', 'pass_string'), 
+    um = accounts.UserMaintSession(pass_string = cf.get('printer', 'pass_string'), 
                     wsdl = cf.get('printer', 'wsdl'))
 
     user_codes, special_codes = read_codes(um, user_code_regions)
