@@ -1,0 +1,4 @@
+af-accounts usr/sbin
+af-sync-accounts usr/sbin
+af-sync-ppds usr/sbin
+af-print-accounts usr/sbin
