@@ -372,7 +372,7 @@ class User(object):
                     { "propName" : "isDestination", "propVal" : "true" },
                     { "propName" : "isSender", "propVal" : "true" },
                     { "propName" : "name", "propVal" : self.name },
-                    { "propName" : "longName", "propVal" : self.name },
+                    { "propName" : "longName", "propVal" : self.name[:15] },
                     { "propName" : "auth:name", "propVal" : self.user_code }
                     ]}}
 class UserMaintSession(object):
