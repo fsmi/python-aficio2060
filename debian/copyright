@@ -1,0 +1,16 @@
+This package was debianized by <Felix.Maurer@gmx.net> on
+Mon, 04 Jun 2012 17:38:14 +0200.
+
+It was downloaded from git://fsmi-dev.fsmi.uni-karlsruhe.de/git/python-aficio2060.git
+
+The python modules are
+
+  Copyright (C) 2007, 2008 Philipp Kern <philipp.kern@fsmi.uni-karlsruhe.de>
+  Copyright (C) 2008, 2009, 2010 Fabian Knittel <fabian.knittel@avona.com>
+  Copyright (C) 2012 Felix Maurer <felix.maurer@gmx.net>
+
+and the Debian packaging is
+
+  Copyright (c) 2012 Felix Maurer <felix.maurer@gmx.net>
+
+and everything is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
