@@ -510,7 +510,7 @@ class UserMaintSession(object):
         """
         self.dm_session = self.dm_service.StartSession(self.pass_string, 0).stringOut
         lock = self.dm_service.LockDevice(self.dm_session, 0, 0)
-        if user.restrict.modified:
+        if user.restrict != None and user.restrict.modified:
             response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : int(user.internal_name), 
                                                                           "class" : "usageControl.userRestrict", 
                                                                           "oid" : int("110002"+str(user.internal_name)),
@@ -518,7 +518,7 @@ class UserMaintSession(object):
                                                                         { "item" : { "propName" : "replaceAll", "propVal" : "false" } } )
             if response.returnValue != "OK":
                 raise UserMaintError("Could not update the user restrictions for user " + str(user.name))
-        if user.stats.modified:
+        if user.stats != None and user.stats.modified:
             response = self.dm_service.UpdateObject(self.dm_session, 0, { "name" : int(user.internal_name), 
                                                                           "class" : "usageCounter.userCounter", 
                                                                           "oid" : int("111002"+str(user.internal_name)),

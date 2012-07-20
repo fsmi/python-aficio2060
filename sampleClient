@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python
 
 from aficio2060 import accounts
 
@@ -10,29 +10,16 @@ from aficio2060 import accounts
 url = "file:///home/k3ks/Development/python-aficio2060/aficio2060.wsdl"
 passString = "SCHEME=QkFTSUM=;UID:UserName=YWRtaW4=;PWD:Password=Puk/P3xsIqA8rqhvvupmYyImr3zjaH9j4WvufP9/qf7/Pv9mbHx/JCp+P3zgZr9nf6YkJ+hnvqc/JP6/Zz4+6v48rj98/2l8PyPopuFu/i4+/y8+aKbvr67+7r9/byZr/qj/4akmqD4iKT++5yl/Kn/iLqLq///p/6G+7OuqaOlraf4+;PES:Encoding=gwpwes003"
 
-client = Client(url, cache=None)
+um = accounts.UserMaintSession(passString, url)
 
-users = {}
+new_user = accounts.User(7777, "TEST123")
+new_user.restrict = accounts.UserRestrict(True,True,True)
+new_user.stats = accounts.UserStatistics()
 
-dm = client.service["DeviceManagementService"]
-ud = client.service["UserDirectoryService"]
+um.add_user(new_user)
 
-dmSession = dm.StartSession(passString, 0)
-udSession = ud.StartSession(passString, 0, "S")
-objects = dm.GetObjects(dmSession.stringOut, 0, "usageCounter.userCounter")
-for o in objects.item:
-	obj = dm.GetObject(dmSession.stringOut, 0, o, {"item" : ["copyBlack", "copyBlackA3Over", "printBlack", "printerBlackA3Over", "scannerBlack", "scannerBlackA3Over", "blackTotal", "blackAccount", "scanTotal", "authName"]})
-	objcap = dm.GetObjectCapability(dmSession.stringOut, 0, obj.oid, "ALL")
-	try:
-		objprops = ud.GetObjectsProps(udSession.stringOut, { "item" : ["entry:"+str(obj.name)] }, { "item" : [ "name", "auth:name" ] }, {})
-		for  item in objprops.item.item:
-			if item.propVal == "4042":
-				print str(o)
-				print str(obj.fieldList.item)
-				print str(objprops)
-		
-	except:
-		print "Error occoured with object " + str(o)
-		
-dm.TerminateSession(dmSession.stringOut)
-ud.TerminateSession(udSession.stringOut)
+new_stats = accounts.UserStatistics()
+new_user.stats = new_stats
+um.set_user_info(new_user)
+
+del um
