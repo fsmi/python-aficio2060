@@ -20,6 +20,7 @@ Package: aficio2060-tools
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}, python-aficio1075,
  python-reportlab, ttf-bitstream-vera, python-unidecode
+Conflicts: aficio1075-tools
 Description: Provides command-line tools to manage RICOH Aficio 2060 printers
  The tools included in this package allow the management and analysis of
  some aspects of the RICOH Aficio 2060 printers.
