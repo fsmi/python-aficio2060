@@ -1,3 +1,10 @@
+python-aficio2060 (0.1-2) fsmi-squeeze; urgency=low
+
+  * debian/control: declare a conflicts against aficio1075-tools
+  * debian/control: actually depend on python-aficio2060
+
+ -- Philipp Kern <pkern@debian.org>  Fri, 20 Jul 2012 18:59:23 +0200
+
 python-aficio2060 (0.1-1) fsmi-squeeze; urgency=low
 
   * Initial release.
