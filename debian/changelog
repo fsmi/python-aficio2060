@@ -1,3 +1,14 @@
+python-aficio2060 (0.1-3) fsmi-buster; urgency=low
+
+  [ Philipp Kern ]
+  * python-aficio2060.install: ship the WSDL in /usr/share
+  * Revert "python-aficio2060.install: ship the WSDL in /usr/share"
+
+  [ Jan Unterbrink ]
+  * delete depends
+
+ -- Jan Unterbrink <jan.unterbrink@subpath.de>  Tue, 13 Nov 2018 18:45:17 +0100
+
 python-aficio2060 (0.1-2) fsmi-squeeze; urgency=low
 
   * debian/control: declare a conflicts against aficio1075-tools
