@@ -3,12 +3,12 @@ Section: python
 Priority: extra
 Maintainer: Felix Maurer <felix.maurer@gmx.net>
 Uploaders: Felix Maurer <felix.maurer@gmx.net>
-Build-Depends: debhelper (>= 7), python-support (>= 0.5.3)
+Build-Depends: debhelper (>= 11)
 Standards-Version: 3.9.1
 
 Package: python-aficio2060
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python-suds
+Depends: ${python:Depends}, ${misc:Depends}
 Provides: ${python:Provides}
 Description: Provides Python wrappers around RICOH Aficio 2060 functions
  The Python modules in this package provide access to various network features
@@ -18,8 +18,7 @@ Description: Provides Python wrappers around RICOH Aficio 2060 functions
 
 Package: aficio2060-tools
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python-aficio2060,
- python-reportlab, ttf-bitstream-vera, python-unidecode
+Depends: ${python:Depends}, ${misc:Depends}, python-aficio2060
 Conflicts: aficio1075-tools
 Description: Provides command-line tools to manage RICOH Aficio 2060 printers
  The tools included in this package allow the management and analysis of
